@@ -11,6 +11,10 @@ client = commands.Bot(command_prefix='/')
 
 @client.event
 async def on_ready():
+    await client.change_presence(
+        status=discord.Status.online,
+        activity=discord.Game('with Python [•w•] 24/7'),
+    )
     print('I am ready!')
 
 
@@ -58,7 +62,7 @@ async def unban(ctx, *, member):
     for entry in banned_users:
         user = entry.user
 
-        if(user.name, user.discriminator) == (member_name, member_discriminator):
+        if (user.name, user.discriminator) == (member_name, member_discriminator):
             await ctx.guild.unban(user)
             await ctx.send(f'The user {user.mention} was unbanned!')
             return
