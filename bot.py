@@ -35,6 +35,7 @@ async def on_member_remove(member):
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
 
+
 @client.command()
 async def ping(ctx):
     await ctx.send(f'Pong! {round(client.latency * 1000)}ms')
@@ -46,8 +47,14 @@ async def _8ball(ctx, *, question):
 
 
 @client.command()
-async def clear(ctx, amount=1):
+async def clear(ctx, amount: int):
     await ctx.channel.purge(limit=amount)
+
+
+@clear.error
+async def clear_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please specify the number of messages to delete.')
 
 
 @client.command()
