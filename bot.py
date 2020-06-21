@@ -3,10 +3,12 @@ import random
 
 import discord
 
-from discord.ext import commands
+from discord.ext import commands, tasks
+from itertools import cycle
 from db import _8ball_responses
 
 client = commands.Bot(command_prefix='/')
+status = cycle(['with Python [•w•] 24/7', '( ͡° ͜ʖ ͡°)', '(ง ͡ʘ ͜ʖ ͡ʘ)ง'])
 
 
 @client.event
@@ -15,6 +17,7 @@ async def on_ready():
         status=discord.Status.online,
         activity=discord.Game('with Python [•w•] 24/7'),
     )
+    change_status.start()
     print('I am ready!')
 
 
@@ -27,6 +30,10 @@ async def on_member_join(member):
 async def on_member_remove(member):
     print(f'The {member} has left the server!')
 
+
+@tasks.loop(seconds=10)
+async def change_status():
+    await client.change_presence(activity=discord.Game(next(status)))
 
 @client.command()
 async def ping(ctx):
