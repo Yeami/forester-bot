@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands, tasks
 from itertools import cycle
 from db import _8ball_responses
+from enums import RolesType
 
 client = commands.Bot(command_prefix='/')
 status = cycle(['with Python [•w•] 24/7', '( ͡° ͜ʖ ͡°)', '(ง ͡ʘ ͜ʖ ͡ʘ)ง'])
@@ -37,6 +38,7 @@ async def change_status():
 
 
 @client.command()
+@commands.has_role(RolesType.ADMINISTRATOR.value)
 async def ping(ctx):
     await ctx.send(f'Pong! {round(client.latency * 1000)}ms')
 
