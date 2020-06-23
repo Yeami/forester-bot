@@ -1,10 +1,12 @@
+import discord
+from discord.ext import commands, tasks
+from discord.utils import get
+
+import youtube_dl
 import os
 import random
-
-import discord
-
-from discord.ext import commands, tasks
 from itertools import cycle
+
 from db import _8ball_responses
 from enums import RolesType
 
@@ -19,17 +21,31 @@ async def on_ready():
         activity=discord.Game('with Python [•w•] 24/7'),
     )
     change_status.start()
-    print('I am ready!')
+    print(f'[log] {client.user.name} is ready!')
+
+
+@client.command(pass_context=True, aliases=['j', 'joi'])
+async def join(ctx):
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        await channel.connect()
+        print(f'[log] The bot has connected to the {channel} channel')
+
+    await ctx.send(f'Joined to the **{channel}** channel')
 
 
 @client.event
 async def on_member_join(member):
-    print(f'The {member} has joined to the server!')
+    print(f'[log] The {member} has joined to the server!')
 
 
 @client.event
 async def on_member_remove(member):
-    print(f'The {member} has left the server!')
+    print(f'[log] The {member} has left the server!')
 
 
 @tasks.loop(seconds=10)
