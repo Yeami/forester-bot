@@ -52,6 +52,50 @@ async def leave(ctx):
         await ctx.send('Don`t think I am in a voice channel')
 
 
+@client.command(pass_context=True, aliases=['p', 'pla'])
+async def play(ctx, url: str):
+    song_there = os.path.isfile('song.mp3')
+    try:
+        if song_there:
+            os.remove('song.mp3')
+            print('[log] Removed the old song file')
+    except PermissionError:
+        print('[log] Trying to delete song file, but it`s being played')
+        await ctx.send('ERROR: Music is playing')
+        return
+
+    await ctx.send('Starting the preparations for playing an audio...')
+
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        print('[log] Downloading the audio...')
+        ydl.download([url])
+
+    for file in os.listdir('./'):
+        if file.endswith('.mp3'):
+            name = file
+            print(f'[log] Renamed the file name - {file}')
+            os.rename(file, 'song.mp3')
+
+    voice.play(discord.FFmpegPCMAudio('song.mp3'), after=lambda e: print('[log] The audio is ready'))
+    voice.source = discord.PCMVolumeTransformer(voice.source)
+    voice.source.volume = 0.07
+
+    audio_name = name.rsplit('-', 2)[0]
+    await ctx.send(f'Starting to play the audio - {audio_name}')
+    print(f'[log] Starting to play the audio - {audio_name}')
+
+
 @client.event
 async def on_member_join(member):
     print(f'[log] The {member} has joined to the server!')
