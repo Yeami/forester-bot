@@ -38,6 +38,20 @@ async def join(ctx):
     await ctx.send(f'Joined to the **{channel}** channel')
 
 
+@client.command(pass_context=True, aliases=['l', 'lea'])
+async def leave(ctx):
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.disconnect()
+        print(f'[log] The bot has left from the {channel} channel')
+        await ctx.send(f'Left from the **{channel}** channel')
+    else:
+        print('[log] Bot was told to leave voice channel, but was not in one')
+        await ctx.send('Don`t think I am in a voice channel')
+
+
 @client.event
 async def on_member_join(member):
     print(f'[log] The {member} has joined to the server!')
