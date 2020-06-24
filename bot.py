@@ -8,11 +8,17 @@ import random
 from itertools import cycle
 
 from db import _8ball_responses
-from enums import RolesType
 from utils import get_audio_length
 
 client = commands.Bot(command_prefix='/')
+extensions = [
+    'cogs.chat',
+]
 status = cycle(['with Python [•w•] 24/7', '( ͡° ͜ʖ ͡°)', '(ง ͡ʘ ͜ʖ ͡ʘ)ง'])
+
+if __name__ == '__main__':
+    for extension in extensions:
+        client.load_extension(extension)
 
 
 @client.event
@@ -22,7 +28,7 @@ async def on_ready():
         activity=discord.Game('with Python [•w•] 24/7'),
     )
     change_status.start()
-    print(f'[log] {client.user.name} is ready!')
+    print(f'[log] {client.user.name} - {client.user.id} is ready | Library v{discord.__version__}')
 
 
 @client.command(pass_context=True, aliases=['j', 'joi'])
@@ -137,16 +143,6 @@ async def stop(ctx):
         await ctx.send('> No audio is playing, so failed to stop')
 
 
-@client.event
-async def on_member_join(member):
-    print(f'[log] The {member} has joined to the server!')
-
-
-@client.event
-async def on_member_remove(member):
-    print(f'[log] The {member} has left the server!')
-
-
 @tasks.loop(seconds=10)
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
@@ -160,18 +156,6 @@ async def ping(ctx):
 @client.command(aliases=['8ball'])
 async def _8ball(ctx, *, question):
     await ctx.send(f'> Question: {question}\nAnswer: {random.choice(_8ball_responses)}')
-
-
-@client.command()
-@commands.has_permissions(manage_messages=True)
-async def clear(ctx, amount: int):
-    await ctx.channel.purge(limit=amount)
-
-
-@clear.error
-async def clear_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('> Please specify the number of messages to delete.')
 
 
 @client.command()
@@ -202,4 +186,4 @@ async def unban(ctx, *, member):
             return
 
 
-client.run(os.environ['BOT_TOKEN'])
+client.run(os.environ['BOT_TOKEN'], bot=True, reconnect=True)
