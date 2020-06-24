@@ -1,18 +1,16 @@
 import discord
 from discord.ext import commands, tasks
-from discord.utils import get
 
-import youtube_dl
 import os
 import random
 from itertools import cycle
 
 from db import _8ball_responses
-from utils import get_audio_length
 
 client = commands.Bot(command_prefix='/')
 extensions = [
     'cogs.admin',
+    'cogs.audio',
     'cogs.chat',
 ]
 status = cycle(['with Python [•w•] 24/7', '( ͡° ͜ʖ ͡°)', '(ง ͡ʘ ͜ʖ ͡ʘ)ง'])
@@ -30,118 +28,6 @@ async def on_ready():
     )
     change_status.start()
     print(f'[log] {client.user.name} - {client.user.id} is ready | Library v{discord.__version__}')
-
-
-@client.command(pass_context=True, aliases=['j', 'joi'])
-async def join(ctx):
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        await channel.connect()
-        print(f'[log] The bot has connected to the {channel} channel')
-
-    await ctx.send(f'> Joined to the **{channel}** channel')
-
-
-@client.command(pass_context=True, aliases=['l', 'lea'])
-async def leave(ctx):
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-
-    if voice and voice.is_connected():
-        await voice.disconnect()
-        print(f'[log] The bot has left from the {channel} channel')
-        await ctx.send(f'> Left from the **{channel}** channel')
-    else:
-        print('[log] Bot was told to leave voice channel, but was not in one')
-        await ctx.send('> Don`t think I am in a voice channel')
-
-
-@client.command(pass_context=True, aliases=['p', 'pla'])
-async def play(ctx, url: str):
-    song_there = os.path.isfile('song.mp3')
-    try:
-        if song_there:
-            os.remove('song.mp3')
-            print('[log] Removed the old song file')
-    except PermissionError:
-        print('[log] Trying to delete song file, but it`s being played')
-        await ctx.send('> ERROR: Music is playing')
-        return
-
-    await ctx.send('> Starting the preparations for playing an audio...')
-
-    voice = get(client.voice_clients, guild=ctx.guild)
-
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-    }
-
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        print('[log] Downloading the audio...')
-        ydl.download([url])
-
-    for file in os.listdir('./'):
-        if file.endswith('.mp3'):
-            name = file
-            print(f'[log] Renamed the file name - {file}')
-            os.rename(file, 'song.mp3')
-
-    voice.play(discord.FFmpegPCMAudio('song.mp3'), after=lambda e: print('[log] The audio is ready'))
-    voice.source = discord.PCMVolumeTransformer(voice.source)
-    voice.source.volume = 0.07
-
-    audio_name = name.rsplit('-', 2)[0]
-    length = get_audio_length('song.mp3')
-    await ctx.send(f'> Starting to play the audio\n**[{length}] {audio_name}**')
-    print(f'[log] Starting to play the audio\n[{length}] {audio_name}')
-
-
-@client.command(pass_context=True, aliases=['pa', 'pau'])
-async def pause(ctx):
-    voice = get(client.voice_clients, guild=ctx.guild)
-
-    if voice and voice.is_playing():
-        print('[log] Audio was paused')
-        voice.pause()
-        await ctx.send('> Audio was paused')
-    else:
-        print('[log] Audio is not playing, so pause was failed')
-        await ctx.send('> Audio is not playing, so pause was failed')
-
-
-@client.command(pass_context=True, aliases=['r', 'res'])
-async def resume(ctx):
-    voice = get(client.voice_clients, guild=ctx.guild)
-
-    if voice and voice.is_paused():
-        print('[log] Resumed the audio')
-        voice.resume()
-        await ctx.send('> Resumed the audio')
-    else:
-        print('[log] Audio is not paused')
-        await ctx.send('> Audio is not paused')
-
-
-@client.command(pass_context=True, aliases=['s', 'sto'])
-async def stop(ctx):
-    voice = get(client.voice_clients, guild=ctx.guild)
-
-    if voice and voice.is_playing():
-        print('[log] Audio was stopped')
-        voice.stop()
-        await ctx.send('> Audio was stopped')
-    else:
-        print('[log] No audio is playing, so failed to stop')
-        await ctx.send('> No audio is playing, so failed to stop')
 
 
 @tasks.loop(seconds=10)
