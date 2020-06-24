@@ -1,10 +1,9 @@
 import os
 
 import discord
+import youtube_dl
 from discord.ext import commands
 from discord.utils import get
-
-import youtube_dl
 
 from utils import get_audio_length
 
