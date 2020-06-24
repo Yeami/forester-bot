@@ -36,7 +36,7 @@ async def join(ctx):
         await channel.connect()
         print(f'[log] The bot has connected to the {channel} channel')
 
-    await ctx.send(f'Joined to the **{channel}** channel')
+    await ctx.send(f'> Joined to the **{channel}** channel')
 
 
 @client.command(pass_context=True, aliases=['l', 'lea'])
@@ -47,10 +47,10 @@ async def leave(ctx):
     if voice and voice.is_connected():
         await voice.disconnect()
         print(f'[log] The bot has left from the {channel} channel')
-        await ctx.send(f'Left from the **{channel}** channel')
+        await ctx.send(f'> Left from the **{channel}** channel')
     else:
         print('[log] Bot was told to leave voice channel, but was not in one')
-        await ctx.send('Don`t think I am in a voice channel')
+        await ctx.send('> Don`t think I am in a voice channel')
 
 
 @client.command(pass_context=True, aliases=['p', 'pla'])
@@ -62,10 +62,10 @@ async def play(ctx, url: str):
             print('[log] Removed the old song file')
     except PermissionError:
         print('[log] Trying to delete song file, but it`s being played')
-        await ctx.send('ERROR: Music is playing')
+        await ctx.send('> ERROR: Music is playing')
         return
 
-    await ctx.send('Starting the preparations for playing an audio...')
+    await ctx.send('> Starting the preparations for playing an audio...')
 
     voice = get(client.voice_clients, guild=ctx.guild)
 
@@ -94,7 +94,7 @@ async def play(ctx, url: str):
 
     audio_name = name.rsplit('-', 2)[0]
     length = get_audio_length('song.mp3')
-    await ctx.send(f'Starting to play the audio\n**[{length}] {audio_name}**')
+    await ctx.send(f'> Starting to play the audio\n**[{length}] {audio_name}**')
     print(f'[log] Starting to play the audio\n[{length}] {audio_name}')
 
 
@@ -105,10 +105,10 @@ async def pause(ctx):
     if voice and voice.is_playing():
         print('[log] Audio was paused')
         voice.pause()
-        await ctx.send('Audio was paused')
+        await ctx.send('> Audio was paused')
     else:
         print('[log] Audio is not playing, so pause was failed')
-        await ctx.send('Audio is not playing, so pause was failed')
+        await ctx.send('> Audio is not playing, so pause was failed')
 
 
 @client.command(pass_context=True, aliases=['r', 'res'])
@@ -118,10 +118,10 @@ async def resume(ctx):
     if voice and voice.is_paused():
         print('[log] Resumed the audio')
         voice.resume()
-        await ctx.send('Resumed the audio')
+        await ctx.send('> Resumed the audio')
     else:
         print('[log] Audio is not paused')
-        await ctx.send('Audio is not paused')
+        await ctx.send('> Audio is not paused')
 
 
 @client.command(pass_context=True, aliases=['s', 'sto'])
@@ -131,10 +131,10 @@ async def stop(ctx):
     if voice and voice.is_playing():
         print('[log] Audio was stopped')
         voice.stop()
-        await ctx.send('Audio was stopped')
+        await ctx.send('> Audio was stopped')
     else:
         print('[log] No audio is playing, so failed to stop')
-        await ctx.send('No audio is playing, so failed to stop')
+        await ctx.send('> No audio is playing, so failed to stop')
 
 
 @client.event
@@ -155,12 +155,12 @@ async def change_status():
 @client.command()
 @commands.has_role(RolesType.ADMINISTRATOR.value)
 async def ping(ctx):
-    await ctx.send(f'Pong! {round(client.latency * 1000)}ms')
+    await ctx.send(f'> Pong! {round(client.latency * 1000)}ms')
 
 
 @client.command(aliases=['8ball'])
 async def _8ball(ctx, *, question):
-    await ctx.send(f'Question: {question}\nAnswer: {random.choice(_8ball_responses)}')
+    await ctx.send(f'> Question: {question}\nAnswer: {random.choice(_8ball_responses)}')
 
 
 @client.command()
@@ -171,7 +171,7 @@ async def clear(ctx, amount: int):
 @clear.error
 async def clear_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Please specify the number of messages to delete.')
+        await ctx.send('> Please specify the number of messages to delete.')
 
 
 @client.command()
@@ -182,7 +182,7 @@ async def kick(ctx, member: discord.Member, *, reason=None):
 @client.command()
 async def ban(ctx, member: discord.Member, *, reason=None):
     await member.ban(reason=reason)
-    await ctx.send(f'The user {member.mention} was banned!')
+    await ctx.send(f'> The user {member.mention} was banned!')
 
 
 @client.command()
@@ -195,7 +195,7 @@ async def unban(ctx, *, member):
 
         if (user.name, user.discriminator) == (member_name, member_discriminator):
             await ctx.guild.unban(user)
-            await ctx.send(f'The user {user.mention} was unbanned!')
+            await ctx.send(f'> The user {user.mention} was unbanned!')
             return
 
 
