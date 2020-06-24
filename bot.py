@@ -153,7 +153,6 @@ async def change_status():
 
 
 @client.command()
-@commands.has_role(RolesType.ADMINISTRATOR.value)
 async def ping(ctx):
     await ctx.send(f'> Pong! {round(client.latency * 1000)}ms')
 
@@ -164,6 +163,7 @@ async def _8ball(ctx, *, question):
 
 
 @client.command()
+@commands.has_permissions(manage_messages=True)
 async def clear(ctx, amount: int):
     await ctx.channel.purge(limit=amount)
 
@@ -175,17 +175,20 @@ async def clear_error(ctx, error):
 
 
 @client.command()
+@commands.has_permissions(administrator=True)
 async def kick(ctx, member: discord.Member, *, reason=None):
     await member.kick(reason=reason)
 
 
 @client.command()
+@commands.has_permissions(administrator=True)
 async def ban(ctx, member: discord.Member, *, reason=None):
     await member.ban(reason=reason)
     await ctx.send(f'> The user {member.mention} was banned!')
 
 
 @client.command()
+@commands.has_permissions(administrator=True)
 async def unban(ctx, *, member):
     banned_users = await ctx.guild.bans()
     member_name, member_discriminator = member.split('#')
