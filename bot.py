@@ -12,6 +12,7 @@ from utils import get_audio_length
 
 client = commands.Bot(command_prefix='/')
 extensions = [
+    'cogs.admin',
     'cogs.chat',
 ]
 status = cycle(['with Python [•w•] 24/7', '( ͡° ͜ʖ ͡°)', '(ง ͡ʘ ͜ʖ ͡ʘ)ง'])
@@ -156,34 +157,6 @@ async def ping(ctx):
 @client.command(aliases=['8ball'])
 async def _8ball(ctx, *, question):
     await ctx.send(f'> Question: {question}\nAnswer: {random.choice(_8ball_responses)}')
-
-
-@client.command()
-@commands.has_permissions(administrator=True)
-async def kick(ctx, member: discord.Member, *, reason=None):
-    await member.kick(reason=reason)
-
-
-@client.command()
-@commands.has_permissions(administrator=True)
-async def ban(ctx, member: discord.Member, *, reason=None):
-    await member.ban(reason=reason)
-    await ctx.send(f'> The user {member.mention} was banned!')
-
-
-@client.command()
-@commands.has_permissions(administrator=True)
-async def unban(ctx, *, member):
-    banned_users = await ctx.guild.bans()
-    member_name, member_discriminator = member.split('#')
-
-    for entry in banned_users:
-        user = entry.user
-
-        if (user.name, user.discriminator) == (member_name, member_discriminator):
-            await ctx.guild.unban(user)
-            await ctx.send(f'> The user {user.mention} was unbanned!')
-            return
 
 
 client.run(os.environ['BOT_TOKEN'], bot=True, reconnect=True)
