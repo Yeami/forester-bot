@@ -9,6 +9,7 @@ from itertools import cycle
 
 from db import _8ball_responses
 from enums import RolesType
+from utils import get_audio_length
 
 client = commands.Bot(command_prefix='/')
 status = cycle(['with Python [•w•] 24/7', '( ͡° ͜ʖ ͡°)', '(ง ͡ʘ ͜ʖ ͡ʘ)ง'])
@@ -92,8 +93,9 @@ async def play(ctx, url: str):
     voice.source.volume = 0.07
 
     audio_name = name.rsplit('-', 2)[0]
-    await ctx.send(f'Starting to play the audio - {audio_name}')
-    print(f'[log] Starting to play the audio - {audio_name}')
+    length = get_audio_length('song.mp3')
+    await ctx.send(f'Starting to play the audio\n**[{length}] {audio_name}**')
+    print(f'[log] Starting to play the audio\n[{length}] {audio_name}')
 
 
 @client.event
