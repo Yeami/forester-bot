@@ -98,6 +98,19 @@ async def play(ctx, url: str):
     print(f'[log] Starting to play the audio\n[{length}] {audio_name}')
 
 
+@client.command(pass_context=True, aliases=['pa', 'pau'])
+async def pause(ctx):
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_playing():
+        print('[log] Audio was paused')
+        voice.pause()
+        await ctx.send('Audio was paused')
+    else:
+        print('[log] Audio is not playing, so pause was failed')
+        await ctx.send('Audio is not playing, so pause was failed')
+
+
 @client.event
 async def on_member_join(member):
     print(f'[log] The {member} has joined to the server!')
