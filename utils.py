@@ -17,3 +17,7 @@ def get_audio_length(audio):
     hours, minutes, seconds = convert(int(MP3(audio).info.length))
 
     return f'{format_time(hours)}:{format_time(minutes)}:{format_time(seconds)}'
+
+
+async def record_usage(ctx):
+    print(f'[log] {ctx.author} used ctx.command at {ctx.message.created_at}')
