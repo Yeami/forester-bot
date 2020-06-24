@@ -124,6 +124,19 @@ async def resume(ctx):
         await ctx.send('Audio is not paused')
 
 
+@client.command(pass_context=True, aliases=['s', 'sto'])
+async def stop(ctx):
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_playing():
+        print('[log] Audio was stopped')
+        voice.stop()
+        await ctx.send('Audio was stopped')
+    else:
+        print('[log] No audio is playing, so failed to stop')
+        await ctx.send('No audio is playing, so failed to stop')
+
+
 @client.event
 async def on_member_join(member):
     print(f'[log] The {member} has joined to the server!')
