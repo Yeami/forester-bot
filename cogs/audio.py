@@ -5,6 +5,7 @@ import youtube_dl
 from discord.ext import commands
 from discord.utils import get
 
+from enums import ColorsType
 from utils import get_audio_length
 
 
@@ -16,16 +17,37 @@ class Audio(commands.Cog):
 
     @commands.command(pass_context=True, aliases=['j'])
     async def join(self, ctx):
-        channel = ctx.message.author.voice.channel
-        voice = get(self.client.voice_clients, guild=ctx.guild)
+        try:
+            channel = ctx.message.author.voice.channel
+            voice = get(self.client.voice_clients, guild=ctx.guild)
 
-        if voice and voice.is_connected():
-            await voice.move_to(channel)
-        else:
-            await channel.connect()
-            print(f'[log] The bot has connected to the {channel} channel')
+            if voice and voice.is_connected():
+                await voice.move_to(channel)
+                print(f'[log] The bot has moved to the {channel} channel')
+            else:
+                await channel.connect()
+                print(f'[log] The bot has connected to the {channel} channel')
 
-        await ctx.send(f'> Joined to the **{channel}** channel')
+            embed = discord.Embed(
+                title=f'Joined to the {channel} channel',
+                color=ColorsType.DEFAULT.value
+            )
+            embed.set_footer(
+                text=f'Command used by {ctx.author.name}#{ctx.author.discriminator}',
+                icon_url=ctx.author.avatar_url
+            )
+            await ctx.send(embed=embed)
+        except AttributeError as e:
+            embed = discord.Embed(
+                title='Command error',
+                description='I can`t connect to the channel because you have not connected to any one',
+                color=ColorsType.ERROR.value
+            )
+            embed.set_footer(
+                text=f'Command used by {ctx.author.name}#{ctx.author.discriminator}',
+                icon_url=ctx.author.avatar_url
+            )
+            await ctx.send(embed=embed)
 
     @commands.command(pass_context=True, aliases=['l'])
     async def leave(self, ctx):
@@ -42,7 +64,6 @@ class Audio(commands.Cog):
 
     @commands.command(pass_context=True, aliases=['p'])
     async def play(self, ctx, url: str):
-        song_there = os.path.isfile('song.mp3')
         try:
             if os.path.isfile('song.mp3'):
                 os.remove('song.mp3')
@@ -69,8 +90,7 @@ class Audio(commands.Cog):
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             print('[log] Downloading the audio...')
-            result = ydl.extract_info(url=url, download=True)
-            # ydl.download([url])
+            audio = ydl.extract_info(url=url, download=True)
 
         for file in os.listdir('./'):
             if file.endswith('.mp3'):
@@ -84,12 +104,13 @@ class Audio(commands.Cog):
 
         audio_name = name.rsplit('-', 2)[0]
         length = get_audio_length('song.mp3')
-        # await ctx.send(f'> Starting to play the audio\n> **[{length}] {audio_name}**')
-        embed = discord.Embed(title=result.get('title'), url=url, description='Now playing', color=0x55c025)
+
+        embed = discord.Embed(title=audio.get('title'), url=url, description='Now playing', color=ColorsType.DEFAULT.value)
         embed.add_field(name='Duration', value=length, inline=True)
-        embed.add_field(name='Author', value=result.get('uploader'), inline=True)
-        embed.set_image(url=result.get('thumbnail'))
+        embed.add_field(name='Author', value=audio.get('uploader'), inline=True)
+        embed.set_image(url=audio.get('thumbnail'))
         embed.set_footer(text=f'Command used by {ctx.author.name}#{ctx.author.discriminator}', icon_url=ctx.author.avatar_url)
+
         await ctx.send(embed=embed)
         print(f'[log] Starting to play the audio\n[{length}] {audio_name}')
 
