@@ -9,3 +9,9 @@ class CustomEnum(Enum):
 
 class RolesType(CustomEnum):
     ADMINISTRATOR = 'Администратор'
+
+
+class ColorsType(CustomEnum):
+    DEFAULT = 0x55c025
+    ERROR = 0xe31e2f
+    WARNING = 0xf2d823
