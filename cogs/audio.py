@@ -11,6 +11,8 @@ from utils import get_audio_length
 class Audio(commands.Cog):
     def __init__(self, client):
         self.client = client
+        self.volume = 0.07
+        # self.queues = {}
 
     @commands.command(pass_context=True, aliases=['j'])
     async def join(self, ctx):
@@ -42,7 +44,7 @@ class Audio(commands.Cog):
     async def play(self, ctx, url: str):
         song_there = os.path.isfile('song.mp3')
         try:
-            if song_there:
+            if os.path.isfile('song.mp3'):
                 os.remove('song.mp3')
                 print('[log] Removed the old song file')
         except PermissionError:
@@ -56,6 +58,8 @@ class Audio(commands.Cog):
 
         ydl_opts = {
             'format': 'bestaudio/best',
+            'quiet': True,
+            'outtmpl': '%(title)s.%(ext)s',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -65,7 +69,8 @@ class Audio(commands.Cog):
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             print('[log] Downloading the audio...')
-            ydl.download([url])
+            result = ydl.extract_info(url=url, download=True)
+            # ydl.download([url])
 
         for file in os.listdir('./'):
             if file.endswith('.mp3'):
@@ -75,11 +80,17 @@ class Audio(commands.Cog):
 
         voice.play(discord.FFmpegPCMAudio('song.mp3'), after=lambda e: print('[log] The audio is ready'))
         voice.source = discord.PCMVolumeTransformer(voice.source)
-        voice.source.volume = 0.07
+        voice.source.volume = self.volume
 
         audio_name = name.rsplit('-', 2)[0]
         length = get_audio_length('song.mp3')
-        await ctx.send(f'> Starting to play the audio\n**[{length}] {audio_name}**')
+        # await ctx.send(f'> Starting to play the audio\n> **[{length}] {audio_name}**')
+        embed = discord.Embed(title=result.get('title'), url=url, description='Now playing', color=0x55c025)
+        embed.add_field(name='Duration', value=length, inline=True)
+        embed.add_field(name='Author', value=result.get('uploader'), inline=True)
+        embed.set_image(url=result.get('thumbnail'))
+        embed.set_footer(text=f'Command used by {ctx.author.name}#{ctx.author.discriminator}', icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=embed)
         print(f'[log] Starting to play the audio\n[{length}] {audio_name}')
 
     @commands.command(pass_context=True)

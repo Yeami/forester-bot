@@ -36,4 +36,4 @@ async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
 
 
-client.run(os.environ['BOT_TOKEN'], bot=True, reconnect=True)
+client.run(os.environ['BOT_TOKEN'], bot=True)
